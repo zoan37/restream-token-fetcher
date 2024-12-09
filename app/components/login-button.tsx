@@ -7,6 +7,10 @@ export default function LoginButton() {
     
     // Store state in cookie
     document.cookie = `oauth_state=${state}; path=/; max-age=3600; SameSite=Lax`;
+
+    // log the client id
+    console.log("client id");
+    console.log(process.env.NEXT_PUBLIC_RESTREAM_CLIENT_ID);
     
     // Redirect to Restream OAuth
     const params = new URLSearchParams({
@@ -14,10 +18,10 @@ export default function LoginButton() {
       redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
       response_type: 'code',
       state: state,
-      scope: 'chat_read chat_send' // Adjust scopes as needed
+      scope: 'chat_read chat_send'
     });
 
-    window.location.href = `https://api.restream.io/oauth/authorize?${params}`;
+    window.location.href = `https://api.restream.io/login?${params}`;
   };
 
   return (
