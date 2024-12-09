@@ -20,15 +20,17 @@ export async function GET(request: NextRequest) {
     const tokenResponse = await fetch('https://api.restream.io/oauth/token', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(
-          `${process.env.RESTREAM_CLIENT_ID}:${process.env.RESTREAM_CLIENT_SECRET}`
-        ).toString('base64')}`
+        'Content-Type': 'application/x-www-form-urlencoded'
+        // 'Authorization': `Basic ${Buffer.from(
+        //   `${process.env.RESTREAM_CLIENT_ID}:${process.env.RESTREAM_CLIENT_SECRET}`
+        // ).toString('base64')}`
       },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
-        code: code
+        code: code,
+        client_id: process.env.NEXT_PUBLIC_RESTREAM_CLIENT_ID!,
+        client_secret: process.env.NEXT_PUBLIC_RESTREAM_CLIENT_SECRET!
       })
     });
 
