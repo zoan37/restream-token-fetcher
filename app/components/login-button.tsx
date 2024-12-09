@@ -17,8 +17,8 @@ export default function LoginButton() {
       client_id: process.env.NEXT_PUBLIC_RESTREAM_CLIENT_ID!,
       redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
       response_type: 'code',
-      state: state,
-      scope: 'chat_read chat_send'
+      state: state
+      // scope: 'chat_read chat_send'
     });
 
     window.location.href = `https://api.restream.io/login?${params}`;
