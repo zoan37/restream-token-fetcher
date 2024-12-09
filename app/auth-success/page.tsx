@@ -1,6 +1,8 @@
+'use server';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import TokenDisplay from './token-display';
+import { clearAuthCookies } from './actions';
 
 export default async function AuthSuccess() {
   const cookieStore = await cookies();
@@ -11,10 +13,7 @@ export default async function AuthSuccess() {
     redirect('/');
   }
 
-  // Clear cookies
-  const cookieJar = await cookies();
-  cookieJar.delete('access_token');
-  cookieJar.delete('refresh_token');
+  await clearAuthCookies();
 
   return (
     <TokenDisplay accessToken={accessToken} refreshToken={refreshToken} />
