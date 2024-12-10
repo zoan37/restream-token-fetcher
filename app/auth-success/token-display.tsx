@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { refreshAccessToken } from '../utils/auth';
-import Cookies from 'js-cookie';
 
 interface TokenDisplayProps {
   accessToken: string;
@@ -18,33 +17,15 @@ export default function TokenDisplay({ accessToken, refreshToken }: TokenDisplay
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const updateCookies = (accessToken: string, refreshToken: string) => {
-    Cookies.set('access_token', accessToken, {
-      secure: true,
-      sameSite: 'strict',
-      expires: 1.0/24
-    });
-    
-    Cookies.set('refresh_token', refreshToken, {
-      secure: true,
-      sameSite: 'strict',
-      expires: 7
-    });
-  };
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
     setError(null);
     try {
       const response = await refreshAccessToken(currentTokens.refreshToken);
-      const newTokens = {
+      setCurrentTokens({
         accessToken: response.access_token,
         refreshToken: response.refresh_token
-      };
-      
-      setCurrentTokens(newTokens);
-      
-      updateCookies(newTokens.accessToken, newTokens.refreshToken);
+      });
     } catch (err) {
       setError('Failed to refresh token');
     } finally {
