@@ -16,6 +16,7 @@ export default function TokenDisplay({ accessToken, refreshToken }: TokenDisplay
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -33,6 +34,28 @@ export default function TokenDisplay({ accessToken, refreshToken }: TokenDisplay
     }
   };
 
+  const handleCopyJson = async () => {
+    const json = JSON.stringify({
+      access_token: currentTokens.accessToken,
+      refresh_token: currentTokens.refreshToken
+    }, null, 2);
+    
+    try {
+      await navigator.clipboard.writeText(json);
+      setIsCopied(true);
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const tokenJson = JSON.stringify({
+    access_token: currentTokens.accessToken,
+    refresh_token: currentTokens.refreshToken
+  }, null, 2);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="max-w-2xl w-full space-y-8 p-8 bg-white rounded-lg shadow">
@@ -41,33 +64,21 @@ export default function TokenDisplay({ accessToken, refreshToken }: TokenDisplay
         </h1>
         
         <div className="space-y-6">
-          {/* Access Token display */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Access Token
+              Authentication Tokens
             </label>
             <div className="relative">
-              <input
-                type="text"
-                readOnly
-                value={currentTokens.accessToken}
-                className="w-full p-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Refresh Token display */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Refresh Token
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                readOnly
-                value={currentTokens.refreshToken}
-                className="w-full p-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
+              <pre className="w-full p-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm text-gray-900 font-mono text-sm overflow-x-auto">
+                {tokenJson}
+              </pre>
+              <button
+                onClick={handleCopyJson}
+                className="absolute right-2 top-2 p-2 text-gray-500 hover:text-gray-700 bg-gray-50 rounded"
+                title="Copy JSON"
+              >
+                {isCopied ? <Check size={16} /> : <Copy size={16} />}
+              </button>
             </div>
           </div>
 
