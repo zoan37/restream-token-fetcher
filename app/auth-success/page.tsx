@@ -2,7 +2,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import TokenDisplay from './token-display';
-import { useEffect } from 'react';
 
 export default async function AuthSuccess() {
   const cookieStore = await cookies();
