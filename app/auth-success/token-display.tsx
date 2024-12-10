@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { refreshAccessToken } from '../utils/auth';
 
 interface TokenDisplayProps {
   accessToken: string;
@@ -9,12 +10,27 @@ interface TokenDisplayProps {
 }
 
 export default function TokenDisplay({ accessToken, refreshToken }: TokenDisplayProps) {
-  const [copied, setCopied] = useState(false);
+  const [currentTokens, setCurrentTokens] = useState({ 
+    accessToken, 
+    refreshToken 
+  });
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const copyToken = async (token: string) => {
-    await navigator.clipboard.writeText(token);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setError(null);
+    try {
+      const response = await refreshAccessToken(currentTokens.refreshToken);
+      setCurrentTokens({
+        accessToken: response.access_token,
+        refreshToken: response.refresh_token
+      });
+    } catch (err) {
+      setError('Failed to refresh token');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   return (
@@ -25,7 +41,7 @@ export default function TokenDisplay({ accessToken, refreshToken }: TokenDisplay
         </h1>
         
         <div className="space-y-6">
-          {/* Token display fields */}
+          {/* Access Token display */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Access Token
@@ -34,24 +50,13 @@ export default function TokenDisplay({ accessToken, refreshToken }: TokenDisplay
               <input
                 type="text"
                 readOnly
-                value={accessToken}
+                value={currentTokens.accessToken}
                 className="w-full p-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               />
-              <button
-                onClick={() => copyToken(accessToken)}
-                className="absolute right-2 top-2 p-1 rounded-md hover:bg-gray-200"
-                title="Copy to clipboard"
-              >
-                {copied ? (
-                  <Check className="h-5 w-5 text-green-500" />
-                ) : (
-                  <Copy className="h-5 w-5 text-gray-500" />
-                )}
-              </button>
             </div>
           </div>
-          
-          {/* Similar field for refresh token */}
+
+          {/* Refresh Token display */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Refresh Token
@@ -60,22 +65,25 @@ export default function TokenDisplay({ accessToken, refreshToken }: TokenDisplay
               <input
                 type="text"
                 readOnly
-                value={refreshToken}
+                value={currentTokens.refreshToken}
                 className="w-full p-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               />
-              <button
-                onClick={() => copyToken(refreshToken)}
-                className="absolute right-2 top-2 p-1 rounded-md hover:bg-gray-200"
-                title="Copy to clipboard"
-              >
-                {copied ? (
-                  <Check className="h-5 w-5 text-green-500" />
-                ) : (
-                  <Copy className="h-5 w-5 text-gray-500" />
-                )}
-              </button>
             </div>
           </div>
+
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300 transition-colors"
+          >
+            {isRefreshing ? 'Refreshing...' : 'Refresh Tokens'}
+          </button>
+          
+          {error && (
+            <div className="text-red-500">
+              {error}
+            </div>
+          )}
         </div>
 
         <div className="mt-4 text-sm text-gray-600">
